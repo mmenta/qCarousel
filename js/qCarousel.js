@@ -50,14 +50,14 @@ var qCarousel = {
 
         promise.done(function(data) {
             // get data
-            this.gallery = JSON.parse(data);
+            var gallery = JSON.parse(data);
 
             // build gallery html
-            this.buildGallery(this.gallery);
+            this.buildGallery(gallery);
 
             // build gallery grid-view
             if( this.settings.gridView ) {
-                this.buildGridView(this.gallery);
+                this.buildGridView(gallery);
                 
                 // bind event listeners
                 this.bindEventsGridView();
@@ -65,12 +65,11 @@ var qCarousel = {
             
             // bind event listeners
             this.bindEventsSingleView();
-            
         }.bind(this));
          
     },
     
-    bindEventsSingleView: function() {   
+    bindEventsSingleView: function() {
         this.instance.single = this.ui.carousel.data('owlCarousel');
         
         this.ui.wrapper.find(this.ui.btnNext).on('click', function(e) {
@@ -129,6 +128,9 @@ var qCarousel = {
         this.ui.gridView.owlCarousel({
             singleItem: true,
             addClassActive: true,
+            afterMove: function() {
+                this.updatePagination();
+            }.bind(this)
         });
     },
 
@@ -140,7 +142,6 @@ var qCarousel = {
     },
     
     afterInitCallback: function() {
-        console.log('owl: ', this.instance.single);
         this.info.totalItems = this.instance.single.owl.owlItems.length;
         
         this.settings.afterInit();
@@ -163,11 +164,17 @@ var qCarousel = {
     showGridView: function() {
         this.ui.gridView.removeClass('hide');
         this.ui.carousel.hide();
+        
+        //update grid pagination        
+        this.updatePagination();
     },
     
     showSingleView: function() {
         this.ui.gridView.addClass('hide');
         this.ui.carousel.show();
+        
+        //show single pagination
+        this.updatePagination();
     },
     
     goToSlide: function(e) {
@@ -193,24 +200,35 @@ var qCarousel = {
     },
     
     updatePagination: function() {
-        var html = (this.instance.single.currentItem + 1) + 
-            '/' + this.info.totalItems;
+        var current,
+            total;
+            
+        // check which is active
+        if( this.instance.single.$elem.is(':visible') ) {
+            current = this.instance.single.currentItem + 1;
+            total = this.instance.single.owl.owlItems.length; 
+        } else {
+            current = this.instance.grid.currentItem + 1;
+            total = this.instance.grid.owl.owlItems.length;
+        }
+        
+        var html = current + '/' + total;
 
         this.ui.wrapper.find(this.ui.pagination).html(html);
     },
     
     updateTitle: function(current) {
-        var title = this.gallery['items'][current].title;
+        var title = this.gallery[current].title;
         this.ui.wrapper.find(this.ui.title).html(title);
     },
     
     updateDesc: function(current) {
-        var desc = this.gallery['items'][current].description;
+        var desc = this.gallery[current].description;
         this.ui.wrapper.find(this.ui.desc).html(desc);
     },
     
     updateCredit: function(current) {
-        var credit = this.gallery['items'][current].credit;
+        var credit = this.gallery[current].credit;
         this.ui.wrapper.find(this.ui.credit).html(credit);
     },
     
@@ -221,6 +239,8 @@ var qCarousel = {
     
     buildGallery: function(gallery) {
         var html = '';
+        var trueCount = 0;
+        var newGallery = {};
        
         // build gallery          
         for( var i = 0; i < gallery.items.length; i++ ) {
@@ -229,13 +249,20 @@ var qCarousel = {
             if( this.settings.adFrequency ) {
                 if( ((i % this.settings.adFrequency) === 0) && (i !== 0) ) {     
                     html += this.buildAdItem();
+                    newGallery[trueCount] = 'ad';
+                    trueCount++;
                 }
             }
             
             // build slide
             html += '<div><img src="' + gallery.items[i].media.src + 
                 '" data-attr="' + i + '" /></div>';
+                    
+            newGallery[trueCount] = gallery.items[i];
+            trueCount++;
         }
+        
+        this.gallery = newGallery;
         
         // output html
         this.ui.carousel.html(html);
@@ -244,8 +271,9 @@ var qCarousel = {
         this.initGallery();
     },
     
-    buildGridView: function(gallery) {        
+    buildGridView: function(gallery) {   
         // gallery loop
+        var trueCount = 0;
         var html = '<div id="' + this.settings.elementId + '-grid" ' + 
             'class="q-carousel grid-view hide">';
         
@@ -258,14 +286,22 @@ var qCarousel = {
   
                 if( i < gallery.items.length ) {
                     html += '<img src="' + gallery.items[i].media.src + '" ' + 
-                        'data-attr="' + i + '" />';
+                        'data-attr="' + trueCount + '" />';
                 }
                 
                 if( y == (this.settings.gridView - 1) ) { 
                     html += '</div>'; 
                 }
-                
+                              
                 i++;
+                trueCount++;
+                
+                // account for ad
+                if( this.settings.adFrequency ) {
+                    if( ((i % this.settings.adFrequency) === 0) && (i !== 0) ) {
+                        trueCount++;
+                    }
+                }
             }
         }
         
