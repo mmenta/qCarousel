@@ -13,6 +13,7 @@ var qCarousel = {
         title      : '.title',
         desc       : '.desc',
         credit     : '.credit',
+        photoId    : '.photo-id',
         pagination : '.pagination',
         btnGrid    : '.btn-grid-view',
         btnSingle  : '.btn-single-view',
@@ -197,6 +198,7 @@ var qCarousel = {
         this.updateTitle(current);
         this.updateDesc(current);
         this.updateCredit(current);
+        this.updatePhotoId(current);
     },
     
     updatePagination: function() {
@@ -230,6 +232,11 @@ var qCarousel = {
     updateCredit: function(current) {
         var credit = this.gallery[current].credit;
         this.ui.wrapper.find(this.ui.credit).html(credit);
+    },
+    
+    updatePhotoId: function(current) {
+        var photoId = this.gallery[current].id;
+        this.ui.wrapper.find(this.ui.photoId).html(photoId);
     },
     
     buildAdItem: function() {
