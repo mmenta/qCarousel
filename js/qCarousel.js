@@ -5,21 +5,23 @@
 var qCarousel = {
     
     ui: {
-        carousel : '',
-        gridView : '',
-        wrapper  : $('.q-carousel-wrapper'),
-        btnNext  : '.next',
-        btnPrev  : '.prev',
-        title    : '.title',
-        desc     : '.desc',
-        credit   : '.credit',
-        btnGrid  : '.btn-grid-view',
-        btnSingle: '.btn-single-view',
-        gridImg  : 'div img'
+        carousel   : '',
+        gridView   : '',
+        wrapper    : $('.q-carousel-wrapper'),
+        btnNext    : '.next',
+        btnPrev    : '.prev',
+        title      : '.title',
+        desc       : '.desc',
+        credit     : '.credit',
+        pagination : '.pagination',
+        btnGrid    : '.btn-grid-view',
+        btnSingle  : '.btn-single-view',
+        gridImg    : 'div img'
     },
 
     info: {
-        currentSlide: 0
+        currentSlide: 0,
+        totalItems: 0
     },
     
     settings: {},
@@ -30,7 +32,9 @@ var qCarousel = {
         // defaults
         this.settings.gridView = settings.gridView || false;
         this.settings.updateInfo = settings.updateInfo !== false ? true : false;
-        this.settings.onNext = settings.onNext || false;
+        this.settings.onChange = settings.onChange || false;
+        this.settings.afterInit = settings.afterInit || false;
+        this.settings.adFrequency = settings.adFrequency || false;
         this.settings.category = settings.category;  // required
         this.settings.elementId = settings.elementId; // required
         this.settings.endpoint = settings.endpoint; // required
@@ -78,6 +82,14 @@ var qCarousel = {
             e.preventDefault();
             this.goToPrev();
         }.bind(this));
+        
+        // update values
+        this.info.totalItems = this.instance.single.owl.owlItems.length;
+        
+        this.updatePagination();
+        
+        // afterInit Callback
+        this.settings.afterInit && this.afterInitCallback();
     },
     
     bindEventsGridView: function() {
@@ -107,8 +119,9 @@ var qCarousel = {
             }.bind(this),
             afterMove: function() {
                 this.settings.updateInfo && this.updateInfo();
-                this.settings.onNext && this.onNextCallback();
-            }.bind(this)
+                this.updatePagination();
+                this.settings.onChange && this.onChangeCallback();
+           }.bind(this)
         });
     },
     
@@ -119,19 +132,22 @@ var qCarousel = {
         });
     },
 
-    onNextCallback: function() {
+    onChangeCallback: function() {
         // update current slide
         this.info.currentSlide = this.getCurrentSlide();  
 
-        this.settings.onNext();       
-    }
+        this.settings.onChange();     
+    },
+    
+    afterInitCallback: function() {
+        console.log('owl: ', this.instance.single);
+        this.info.totalItems = this.instance.single.owl.owlItems.length;
+        
+        this.settings.afterInit();
+    },
 
     getCurrentSlide: function() {
-        var currentSlide = 0;
-
-        currentSlide = this.ui.carousel.find('.owl-item.active').children('div').children('img').data('attr');
-
-        return currentSlide;
+        return this.instance.single.currentItem;
     },
     
     goToNext: function() {        
@@ -172,6 +188,13 @@ var qCarousel = {
         this.updateCredit(current);
     },
     
+    updatePagination: function() {
+        var html = (this.instance.single.currentItem + 1) + 
+            '/' + this.info.totalItems;
+
+        this.ui.wrapper.find(this.ui.pagination).html(html);
+    },
+    
     updateTitle: function(current) {
         var title = this.gallery['items'][current].title;
         this.ui.wrapper.find(this.ui.title).html(title);
@@ -187,11 +210,25 @@ var qCarousel = {
         this.ui.wrapper.find(this.ui.credit).html(credit);
     },
     
+    buildAdItem: function() {
+        var html = '<div>THIS SLIDE RESERVED FOR AD</div>';
+        return html;
+    },
+    
     buildGallery: function(gallery) {
         var html = '';
        
         // build gallery          
         for( var i = 0; i < gallery.items.length; i++ ) {
+            
+            // build ad
+            if( this.settings.adFrequency ) {
+                if( ((i % this.settings.adFrequency) === 0) && (i !== 0) ) {     
+                    html += this.buildAdItem();
+                }
+            }
+            
+            // build slide
             html += '<div><img src="' + gallery.items[i].media.src + 
                 '" data-attr="' + i + '" /></div>';
         }
