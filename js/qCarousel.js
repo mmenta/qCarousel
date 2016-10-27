@@ -64,11 +64,13 @@ var qCarousel = {
     bindEventsSingleView: function() {   
         this.instance.single = this.ui.carousel.data('owlCarousel');
         
-        this.ui.wrapper.find(this.ui.btnNext).on('click', function() {
+        this.ui.wrapper.find(this.ui.btnNext).on('click', function(e) {
+            e.preventDefault();
             this.goToNext();
         }.bind(this));
         
-        this.ui.wrapper.find(this.ui.btnPrev).on('click', function() {
+        this.ui.wrapper.find(this.ui.btnPrev).on('click', function(e) {
+            e.preventDefault();
             this.goToPrev();
         }.bind(this));
     },
@@ -76,11 +78,13 @@ var qCarousel = {
     bindEventsGridView: function() {
         this.instance.grid = this.ui.gridView.data('owlCarousel');
         
-        this.ui.wrapper.find(this.ui.btnGrid).on('click', function() {
+        this.ui.wrapper.find(this.ui.btnGrid).on('click', function(e) {
+            e.preventDefault();
             this.showGridView();
         }.bind(this));
         
-        this.ui.wrapper.find(this.ui.btnSingle).on('click', function() {
+        this.ui.wrapper.find(this.ui.btnSingle).on('click', function(e) {
+            e.preventDefault();
             this.showSingleView();
         }.bind(this));
         
