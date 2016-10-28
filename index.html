@@ -40,7 +40,10 @@
             endpoint: 'http://learningjordan.quantasy.com/includes/ajax.php',
             category: 181,
             gridView: 8,
-            updateInfo: false
+            updateInfo: false,
+            onNext: function() {
+                console.log('currentSlide: ', qCarousel.info.currentSlide);
+            }
         });
 
     });

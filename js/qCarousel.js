@@ -17,6 +17,10 @@ var qCarousel = {
         btnSingle: '.btn-single-view',
         gridImg  : 'div img'
     },
+
+    info: {
+        currentSlide: 0
+    },
     
     settings: {},
     instance: {},
@@ -26,6 +30,7 @@ var qCarousel = {
         // defaults
         this.settings.gridView = settings.gridView || false;
         this.settings.updateInfo = settings.updateInfo !== false ? true : false;
+        this.settings.onNext = settings.onNext || false;
         this.settings.category = settings.category;  // required
         this.settings.elementId = settings.elementId; // required
         this.settings.endpoint = settings.endpoint; // required
@@ -102,6 +107,7 @@ var qCarousel = {
             }.bind(this),
             afterMove: function() {
                 this.settings.updateInfo && this.updateInfo();
+                this.settings.onNext && this.onNextCallback();
             }.bind(this)
         });
     },
@@ -111,6 +117,21 @@ var qCarousel = {
             singleItem: true,
             addClassActive: true,
         });
+    },
+
+    onNextCallback: function() {
+        // update current slide
+        this.info.currentSlide = this.getCurrentSlide();  
+
+        this.settings.onNext();       
+    }
+
+    getCurrentSlide: function() {
+        var currentSlide = 0;
+
+        currentSlide = this.ui.carousel.find('.owl-item.active').children('div').children('img').data('attr');
+
+        return currentSlide;
     },
     
     goToNext: function() {        
@@ -171,7 +192,8 @@ var qCarousel = {
        
         // build gallery          
         for( var i = 0; i < gallery.items.length; i++ ) {
-            html += '<div><img src="' + gallery.items[i].media.src + '" /></div>';
+            html += '<div><img src="' + gallery.items[i].media.src + 
+                '" data-attr="' + i + '" /></div>';
         }
         
         // output html
