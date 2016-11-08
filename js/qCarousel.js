@@ -124,7 +124,7 @@ var qCarousel = {
         this.info.currentSlide = this.getCurrentSlide();  
 
         this.settings.onNext();       
-    }
+    },
 
     getCurrentSlide: function() {
         var currentSlide = 0;
@@ -158,10 +158,14 @@ var qCarousel = {
         var slideNumber = $(e.currentTarget).data('attr');
         
         // set slide
-        this.instance.single.jumpTo(slideNumber);
+        this.jumpToSlide(slideNumber);
         
         // show gallery view
         this.showSingleView();
+    },
+
+    jumpToSlide: function(slide) {
+        this.instance.single.jumpTo(slide);
     },
     
     updateInfo: function() {
