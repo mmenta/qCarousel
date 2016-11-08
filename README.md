@@ -12,4 +12,5 @@
 * endpoint [string] - The url of the endpoint we're requesting the json data from. (required)
 * category [integer] - Category ID of the gallery we're requesting. (required)
 * gridView [integer] - Specify how many images to show per slide in the grid view. You can set to false if you don't want to render a grid view.
+* adFrequency [integer] - Inserts an ad in every (x) slot.
 * updateInfo [boolean] - Set to true if you have title, desc, credit set for each image and you want it to update when you change slides.
